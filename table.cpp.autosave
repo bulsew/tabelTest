@@ -314,7 +314,7 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
 {
     if(mode==alter_mode::DROP&&class_A==alter_class::ROW)//删除列
     {
-
+        //
     }
     else if(mode==alter_mode::DROP&&class_A==alter_class::PRIMARY_KRY)//删除主键
     {
@@ -389,10 +389,6 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
         return success;
     }
     else if(mode==alter_mode::MODIFY&&class_A==alter_class::ROW)
-    {
-
-    }
-    else if(mode==alter_mode::ALTER&&class_A==alter_class::ROW)
     {
 
     }

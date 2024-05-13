@@ -13,6 +13,8 @@
 #include <stack>
 #include <QDate>
 #include"constrain.h"
+#include<limits>
+#include <cmath>
 using namespace std;
 
 
@@ -31,11 +33,11 @@ struct tableRows//要给一个静态变量int
     string forignKeyName="";//外键名称//多个外键怎么办？？？？？？？？？？？？？
     string forignKeyTable="";//外键所属表名称
     string default_content="";//默认值
-    string constrainMessage="";//列的限制
+    bool constrainMessage=false;//列的限制
     string content="";
     tableRows(string rowNames,type rowType
              ,bool isPrimaryKey=false, string forignKeyName=""
-            ,string forignKeyTable="",string default_content="",string constrainMessage="",string content=""):
+            ,string forignKeyTable="",string default_content="",bool constrainMessage=false,string content=""):
     rowName(rowNames),rowType(rowType),
     isPrimaryKey(isPrimaryKey),forignKeyName(forignKeyName),
     forignKeyTable(forignKeyTable),default_content(default_content) ,constrainMessage(constrainMessage),content(content)
@@ -47,6 +49,7 @@ struct tableRows//要给一个静态变量int
 class Table
 {
     static const char delimiter = '\n';//文件写入分隔符
+public:
     enum class save_mode{CONTENT=-1,ATTRIBUTE=1,BOTH=0};//保存文件的选项
     enum class delete_mode{ALL=-1,SELECT=0};
     enum class alter_mode{DROP,ADD,RENAME,MODIFY,ALTER};
@@ -59,7 +62,7 @@ class Table
 
 
 private:
-    string add;//文件夹保存地址
+public:string add;//文件夹保存地址
     string tableName;//表名称
 
 
@@ -198,19 +201,210 @@ private:
         return operands.top();
     }
     //模板的定义要放在头文件里
-public:template<class inPut>
-    bool translateFromConstrainMessageAndCheck(const string& message,const type&type,const inPut &inputs)
+public:
+    bool checkConstrains(const string& message,const type&type,const string &inputs)//先前必须已经检查过inputs的类型正确
+    {
+        if(type==type::INT)
+        {
+            int newInput;
+            if(inputs=="")//空值
+                newInput=numeric_limits<int>::min()+1;//用最小负值+1表示null
+            else
+                newInput=stoi(inputs);
+            return translateFromConstrainMessageAndCheck_i(message,type,newInput);
+        }
+        else if (type==type::DOUBLE)
+        {
+            double newInput;
+            if(inputs=="")//空值
+            {
+                newInput=numeric_limits<double>::quiet_NaN();//用numeric_limits<double>::quiet_NaN()表示null
+            }
+            else
+                newInput=stod(inputs);
+            return translateFromConstrainMessageAndCheck_d(message,type,newInput);
+        }
+        else if (type==type::CHAR)
+        {
+            return translateFromConstrainMessageAndCheck_c(message,type,inputs);
+        }
+    }
+    template<class inPut>
+    bool translateFromConstrainMessageAndCheck_c(const string& message,const type&type,const inPut &inputs)
+        {
+            //cerr<<message<<endl;
+            istringstream iss(message);
+            string line;
+            int n;
+            string content;
+            vector<string> strings;
+            //cout<<message<<endl;
+            // 读取第一行：整数n
+            if (!(iss >> n))
+            {
+                cerr << "Invalid input: could not read the first line (integer n)iiii." << endl;
+                return false;
+            }
+
+            // 忽略第一行后面的换行符
+            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            // 读取第二行：字符串content
+            if (!std::getline(iss, content))
+            {
+                std::cerr << "Invalid input: could not read the second line (content)." << std::endl;
+                return false;
+            }
+
+            // 读取第三行及以后的n个字符串
+            for (int i = 0; i < n && std::getline(iss, line); ++i)
+            {
+                strings.push_back(line);
+            }
+
+            // 检查是否读取了足够的字符串
+            if (strings.size() != (unsigned int)n)
+            {
+                std::cerr << "Invalid input: did not read the expected number of strings." << std::endl;
+                return false;
+            }
+
+            //对每一个限制进行处理
+            vector<bool>checks;
+            for(unsigned int i=0;i<(unsigned int)n;++i)
+            {
+                vector<string> a=splitByPipe(strings[i]);
+                if(a[0]=="daYu")
+                {
+                    if(!checkType(type,a[1]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+
+                    daYu<inPut> c(static_cast<inPut>((a[1])));
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="xiaoYu")
+                {
+
+                    if(!checkType(type,a[1]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+
+                    xiaoYu<inPut> c(static_cast<inPut>((a[1])));
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="dengYu")
+                {
+                    if(!checkType(type,a[1]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+
+                    dengYu<inPut> c(static_cast<inPut>((a[1])));
+                    checks.push_back(c(inputs));
+
+                }
+                else if(a[0]=="xiaoYuDengYu")
+                {
+                    if(!checkType(type,a[1]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+                    xiaoYuDengYu<inPut> c(static_cast<inPut>((a[1])));
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="daYuDengYu")
+                {
+
+                    if(!checkType(type,a[1]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+                    daYuDengYu<inPut> c(static_cast<inPut>((a[1])));
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="between")
+                {
+                    if(!checkType(type,a[1])||!checkType(type,a[2]))
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+                    between<inPut> c(static_cast<inPut>((a[1])),static_cast<inPut>((a[2])));
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="notNull")//非空限制
+                {
+                    inputs==""?checks.push_back(false):checks.push_back(true);
+                }
+                else if(a[0]=="in")
+                {
+                    bool flag=true;
+                    vector<inPut> list;
+                    for(unsigned int j=1;j<a.size();++j)
+                    {
+                        flag*=checkType(type,a[j]);
+                        list.push_back(static_cast<inPut>((a[j])));
+                    }
+                    if(!flag)
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+                    //ceshi
+    //                for(auto p:list) cout<<p<<endl;
+    //                cout<<endl;
+    //                for(auto p:a) cout<<p<<endl;
+
+                    //ceshi
+                    in<inPut> c(list);
+                    checks.push_back(c(inputs));
+                }
+                else if(a[0]=="notIn")
+                {
+                    bool flag=true;
+                    vector<inPut> list;
+                    for(unsigned int j=1;j<a.size();++j)
+                    {
+                        flag*=checkType(type,a[j]);
+                        list.push_back(static_cast<inPut>((a[j])));
+                    }
+                    if(!flag)
+                    {
+                        cerr<<"constrain type not match！"<<endl;
+                        return false;
+                    }
+                    notIn<inPut> c(list);
+                    checks.push_back(c(inputs));
+                }
+                else
+                {
+                    cerr<<"no such constrain"<<endl;
+                    return false;
+                }
+            }
+            return evaluate(content,checks);
+        }//翻译限制消息，检查限制信息
+    template<class inPut>
+    bool translateFromConstrainMessageAndCheck_i(const string& message,const type&type,const inPut &inputs)
     {
         istringstream iss(message);
         string line;
         int n;
         string content;
-        vector<std::string> strings;
+        vector<string> strings;
 
         // 读取第一行：整数n
         if (!(iss >> n))
         {
-            std::cerr << "Invalid input: could not read the first line (integer n)." << std::endl;
+            std::cerr << "Invalid input: could not read the first line (integer n)" << std::endl;
             return false;
         }
 
@@ -308,11 +502,15 @@ public:template<class inPut>
                 between<inPut> c(static_cast<inPut>(stoi(a[1])),static_cast<inPut>(stoi(a[2])));
                 checks.push_back(c(inputs));
             }
+            else if(a[0]=="notNull")//非空限制
+            {
+                inputs==numeric_limits<int>::min()+1?checks.push_back(false):checks.push_back(true);
+            }
             else if(a[0]=="in")
             {
                 bool flag=true;
                 vector<inPut> list;
-                for(unsigned int j=2;j<=(unsigned int)n+1;++j)
+                for(unsigned int j=1;j<a.size();++j)
                 {
                     flag*=checkType(type,a[j]);
                     list.push_back(static_cast<inPut>(stoi(a[j])));
@@ -329,7 +527,7 @@ public:template<class inPut>
             {
                 bool flag=true;
                 vector<inPut> list;
-                for(unsigned int j=2;j<=(unsigned int)n+1;++j)
+                for(unsigned int j=1;j<a.size();++j)
                 {
                     flag*=checkType(type,a[j]);
                     list.push_back(static_cast<inPut>(stoi(a[j])));
@@ -350,6 +548,171 @@ public:template<class inPut>
         }
         return evaluate(content,checks);
     }//翻译限制消息，检查限制信息
+    template<class inPut>
+    bool translateFromConstrainMessageAndCheck_d(const string& message,const type&type,const inPut &inputs)
+    {
+        istringstream iss(message);
+        string line;
+        int n;
+        string content;
+        vector<string> strings;
+
+        // 读取第一行：整数n
+        if (!(iss >> n))
+        {
+            std::cerr << "Invalid input: could not read the first line (integer n)." << std::endl;
+            return false;
+        }
+
+        // 忽略第一行后面的换行符
+        iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        // 读取第二行：字符串content
+        if (!std::getline(iss, content))
+        {
+            std::cerr << "Invalid input: could not read the second line (content)." << std::endl;
+            return false;
+        }
+
+        // 读取第三行及以后的n个字符串
+        for (int i = 0; i < n && std::getline(iss, line); ++i)
+        {
+            strings.push_back(line);
+        }
+
+        // 检查是否读取了足够的字符串
+        if (strings.size() != (unsigned int)n)
+        {
+            std::cerr << "Invalid input: did not read the expected number of strings." << std::endl;
+            return false;
+        }
+
+        //对每一个限制进行处理
+        vector<bool>checks;
+        for(unsigned int i=0;i<(unsigned int)n;++i)
+        {
+            vector<string> a=splitByPipe(strings[i]);
+            if(a[0]=="daYu")
+            {
+                if(!checkType(type,a[1]))
+                {
+                    cout<<type<<"  "<<a[1];
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+
+                daYu<inPut> c(static_cast<inPut>(stod(a[1])));
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="xiaoYu")
+            {
+
+                if(!checkType(type,a[1]))
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+
+                xiaoYu<inPut> c(static_cast<inPut>(stod(a[1])));
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="dengYu")
+            {
+                if(!checkType(type,a[1]))
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+
+                dengYu<inPut> c(static_cast<inPut>(stod(a[1])));
+                checks.push_back(c(inputs));
+
+            }
+            else if(a[0]=="xiaoYuDengYu")
+            {
+                if(!checkType(type,a[1]))
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+                xiaoYuDengYu<inPut> c(static_cast<inPut>(stod(a[1])));
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="daYuDengYu")
+            {
+
+                if(!checkType(type,a[1]))
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+                daYuDengYu<inPut> c(static_cast<inPut>(stod(a[1])));
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="between")
+            {
+                if(!checkType(type,a[1])||!checkType(type,a[2]))
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+                between<inPut> c(static_cast<inPut>(stod(a[1])),static_cast<inPut>(stod(a[2])));
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="notNull")//非空限制
+            {
+                isnan(inputs)?checks.push_back(false):checks.push_back(true);
+            }
+            else if(a[0]=="in")
+            {
+                bool flag=true;
+                vector<inPut> list;
+                for(unsigned int j=1;j<a.size();++j)
+                {
+                    flag*=checkType(type,a[j]);
+                    list.push_back(static_cast<inPut>(stod(a[j])));
+                }
+                if(!flag)
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+                //ceshi
+//                for(auto p:list) cout<<p<<endl;
+//                cout<<endl;
+//                for(auto p:a) cout<<p<<endl;
+
+                //ceshi
+                in<inPut> c(list);
+                checks.push_back(c(inputs));
+            }
+            else if(a[0]=="notIn")
+            {
+                bool flag=true;
+                vector<inPut> list;
+                for(unsigned int j=1;j<a.size();++j)
+                {
+                    flag*=checkType(type,a[j]);
+                    list.push_back(static_cast<inPut>(stod(a[j])));
+                }
+                if(!flag)
+                {
+                    cerr<<"constrain type not match！"<<endl;
+                    return false;
+                }
+                notIn<inPut> c(list);
+                checks.push_back(c(inputs));
+            }
+            else
+            {
+                cerr<<"no such constrain"<<endl;
+                return false;
+            }
+        }
+        return evaluate(content,checks);
+    }//翻译限制消息，检查限制信息
+    string getContrain(const string& rowname);//获得限制的string内容
+    bool setContrain(const string& rowname,const string& contents);//设置限制的string内容
 public:
     Table(const string& tableName);//已存在表构造函数
     Table(const vector<tableRows>& newTable,const string& tableName);//创建表构造函数
@@ -359,8 +722,8 @@ public:
 
     bool dropTable();//drop表
     bool instertTOTable( const string& content,const string &correspond="");
-    bool deleteFromTable(const delete_mode=delete_mode::ALL);
-    bool updateTable(const vector<string>&rowname,const vector<string>&goal/*,constrains*/);
+    bool deleteFromTable(const delete_mode& mode=delete_mode::ALL,const vector<string>&rowname={},const vector<string>&constrainMessage={});
+    bool updateTable(const vector<string>&rowname,const vector<string>&goal,const vector<string>&constrainMessage);
     bool alterTable(const alter_mode& mode,const alter_class& class_A,const string& content);
 
 

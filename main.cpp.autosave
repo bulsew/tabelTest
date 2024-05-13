@@ -113,41 +113,31 @@ int main(int argc, char *argv[])
 //              cerr<<"nsa"<<endl;
     Table c("sc");
     string add=c.add;
-    QString oldDirPath = QString::fromStdString(add);
-    qDebug() <<oldDirPath ;
-    QString newDirName = QString::fromStdString("content"); // 注意：这里只是新的目录名，不包含路径
-
-    QDir oldDir(oldDirPath);
-    if (!oldDir.exists()) {
-        qDebug() << "Directory does not exist:" << oldDirPath;
-        return false;
-    }
-
-    QString parentDirPath = oldDir.absolutePath();
-    qDebug() << "Directory does not exist:" << parentDirPath;
-
-    QString newDirPath = QDir(parentDirPath).filePath(newDirName); // 构建新的目录路径
-
-    QDir newDirParent = QDir(parentDirPath); // 确保父目录存在
-    if (!newDirParent.exists()) {
-        qDebug() << "Parent directory does not exist:" << parentDirPath;
-        return false;
-    }
-
-    // 检查新目录名是否已存在（作为文件或目录）
-    QFileInfo fileInfo(newDirPath);
-    if (fileInfo.exists()) {
-        qDebug() << "New directory name already exists:" << newDirPath;
-        return false;
-    }
-
-    // 尝试重命名目录
-    bool success = QDir().rename(oldDirPath, newDirPath);
-    if (!success) {
-        qDebug() << "Failed to rename directory from" << oldDirPath << "to" << newDirPath;
-    }
-
-    return success;
+    // 将std::string转换为QString  
+        QString oldDirPath = QString::fromStdString();  
+        QString newDirPath = QString::fromStdString(newDirPathStd);  
+      
+        // 确保旧的目录存在  
+        QDir oldDir(oldDirPath);  
+        if (!oldDir.exists()) {  
+            qDebug() << "Directory does not exist:" << oldDirPath.toStdString();  
+            return false;  
+        }  
+      
+        // 确保新的目录路径的父目录存在  
+        QDir newDirParent = QDir(QFileInfo(newDirPath).absolutePath());  
+        if (!newDirParent.exists()) {  
+            qDebug() << "Parent directory of new path does not exist:" << newDirParent.absolutePath().toStdString();  
+            return false;  
+        }  
+      
+        // 尝试重命名目录  
+        bool success = QDir().rename(oldDirPath, newDirPath);  
+        if (!success) {  
+            qDebug() << "Failed to rename directory from" << oldDirPath.toStdString() << "to" << newDirPath.toStdString();  
+        }  
+      
+        return success;  
 
 
 
