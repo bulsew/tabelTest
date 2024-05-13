@@ -422,15 +422,39 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
 //    }
     else if(mode==alter_mode::RENAME&&class_A==alter_class::ROW)
     {
-
+        //检查是否有这列
+        unsigned int i=0;
+        for(;i<(unsigned int)row_num;++i)
+        {
+            if(rows[i].rowName==content)
+                break;
+        }
+        if(i>=(unsigned int )row_num)
+        {
+            cerr<<"no such row!!"<<endl;
+            return false;
+        }
+        rows[i].rowName=content;
+        saveToFile(save_mode::ATTRIBUTE);
+        if(rows[i].constrainMessage==true)
+        {
+            //修改constrain文件名
+            
+            
+            
+            
+            
+            
+            
+        }
     }
     else if(mode==alter_mode::RENAME&&class_A==alter_class::TABLE)
     {
-
+        //重命名文件夹
     }
     else if(mode==alter_mode::MODIFY&&class_A==alter_class::ROW)
     {
-
+        
     }
     else
     {
