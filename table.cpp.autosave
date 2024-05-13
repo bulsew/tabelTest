@@ -314,9 +314,28 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
 {
     if(mode==alter_mode::DROP&&class_A==alter_class::ROW)//删除列
     {
-        //
+        //检查是否有这列
+        unsigned int i=0;
+        for(;i<(unsigned int)row_num;++i)
+        {
+            if(rows[i].rowName==content)
+                break;
+        }
+        if(i>=(unsigned int )row_num)
+        {
+            cerr<<"no such row!!"<<endl;
+            return false;
+        }
+        //主键禁止删除
+        if(rows[i].isPrimaryKey)
+        {
+            cerr<<"cannot drop primarykey!"<<endl;
+            return false;
+        }
+        //删除该列
+        
     }
-    else if(mode==alter_mode::DROP&&class_A==alter_class::PRIMARY_KRY)//删除主键
+    else if(mode==alter_mode::DROP&&class_A==alter_class::PRIMARY_KRY)//删除主键(f)
     {
         vector<string> rownames=splitByPipe(content);
         for(auto name:rownames)
@@ -337,11 +356,39 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
                 cerr<<"no such row,change stop here!"<<endl;
                 return false;
             }
+            
         }
     }
     else if(mode==alter_mode::DROP&&class_A==alter_class::CONSTRAIN)//删除约束
     {
-
+        //检查是否有这列
+        unsigned int i=0;
+        for(;i<(unsigned int)row_num;++i)
+        {
+            if(rows[i].rowName==content)
+                break;
+        }
+        if(i>=(unsigned int )row_num)
+        {
+            cerr<<"no such row!!"<<endl;
+            return false;
+        }
+        if(rows[i].constrainMessage==false)
+        {
+            cerr<<"no constrains to drop!"<<endl;
+        }
+        else
+        {
+            rows[i].constrainMessage=false;
+            saveToFile(save_mode::ATTRIBUTE);
+            //删除文件constrain
+            
+            
+            
+            
+            
+            
+        }
     }
     else if(mode==alter_mode::ADD&&class_A==alter_class::ROW)//增加列
     {
@@ -349,7 +396,25 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
     }
     else if(mode==alter_mode::ADD&&class_A==alter_class::CONSTRAIN)//增加约束
     {
-
+        //检查是否有这列
+        unsigned int i=0;
+        for(;i<(unsigned int)row_num;++i)
+        {
+            if(rows[i].rowName==content)
+                break;
+        }
+        if(i>=(unsigned int )row_num)
+        {
+            cerr<<"no such row!!"<<endl;
+            return false;
+        }
+        //重写约束问文件
+        
+        
+        
+        
+        
+        
     }
 //    else if(mode==alter_mode::DROP&&class_A==alter_class::ROW)增加索引
 //    {
@@ -361,32 +426,7 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
     }
     else if(mode==alter_mode::RENAME&&class_A==alter_class::TABLE)
     {
-        //qt改文件名
-        QString oldDirPath = QString::fromStdString(add);
-        cout<<add<<endl;
-        QString newDirPath = QString::fromStdString(content);
-        cout<<content<<endl;
-    // 确保旧的目录存在
-        QDir oldDir(oldDirPath);
-        if (!oldDir.exists()) {
-            cout<< "Directory does not exist:" << oldDirPath.toStdString();
-            return false;
-        }
 
-        // 确保新的目录路径的父目录存在
-        QDir newDirParent = QDir(QFileInfo(newDirPath).absolutePath());
-        if (!newDirParent.exists()) {
-           cout<< "Parent directory of new path does not exist:" << newDirParent.absolutePath().toStdString();
-            return false;
-        }
-
-        // 尝试重命名目录
-        bool success = QDir().rename(oldDirPath, newDirPath);
-        if (!success) {
-            cout<< "Failed to rename directory from" << oldDirPath.toStdString() << "to" << newDirPath.toStdString();
-        }
-
-        return success;
     }
     else if(mode==alter_mode::MODIFY&&class_A==alter_class::ROW)
     {
