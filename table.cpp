@@ -233,7 +233,7 @@ bool Table::deleteFromTable(const delete_mode& mode,const vector<string>&rowname
 }
 
 //实在不想写了，这里只能修改一列，sql修改多列就多次调用
-bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &class_A, const string &content)
+bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &class_A, const string &content,const string& constrainn)
 {
     if(mode==alter_mode::DROP&&class_A==alter_class::ROW)//删除列(f)
     {
@@ -384,27 +384,25 @@ bool Table::alterTable(const Table::alter_mode &mode, const Table::alter_class &
         }
         saveToFile(save_mode::BOTH);
     }
-    else if(mode==alter_mode::ADD&&class_A==alter_class::CONSTRAIN)//增加约束  只允许增加一个约束
+    else if(mode==alter_mode::ADD&&class_A==alter_class::CONSTRAIN)//增加约束(uf)  只允许增加一个约束 此处用到最后一个约束 da|666
     {
         //检查是否有这列
-        unsigned int i=0;
-        for(;i<(unsigned int)row_num;++i)
+
+        for(unsigned int i=0;i<(unsigned int)row_num;++i)
         {
             if(rows[i].rowName==content)
-                break;
+            {
+                cerr<<"already have such row!!"<<endl;
+                return false;
+            }
         }
-        if(i>=(unsigned int )row_num)
-        {
-            cerr<<"no such row!!"<<endl;
-            return false;
-        }
+
         //重写约束问文件
-        
-        
-        
-        
-        
-        
+        //cerr<<message<<endl;
+        string newCons=getContrain(content);
+        newCons.append(constrainn);
+        newCons[0] = 'h';
+        setContrain(content,newCons);
     }
     else if(mode==alter_mode::RENAME&&class_A==alter_class::ROW)//列重命名,传两个string|string，一个是旧名，一个是新名(f)
     {

@@ -725,7 +725,7 @@ public:
     bool instertTOTable( const string& content,const string &correspond="");
     bool deleteFromTable(const delete_mode& mode=delete_mode::ALL,const vector<string>&rowname={},const vector<string>&constrainMessage={},const string& operation="");
     bool updateTable(const vector<string>&rowname,const vector<string>&goal,const vector<string>&cname,const vector<string>&constrainMessage,const string& operation="");
-    bool alterTable(const alter_mode& mode,const alter_class& class_A,const string& content);
+    bool alterTable(const alter_mode& mode,const alter_class& class_A,const string& content,const string& constrainn="");
 
     //kenny
     bool selectfrom(const vector<string>& selectedrows ,const string& tableName,const vector<string>rowname,const vector<string>&constrainMessage,const string& operation);
