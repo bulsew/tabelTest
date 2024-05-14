@@ -35,29 +35,39 @@ int main(int argc, char *argv[])
 
 
 //删除指定内容示例代码
-//    Table c ("sc");
+//    Table c ("sc1");
 //    vector<string>name;
 //    name.push_back("grade");
+//    name.push_back("name");
 //    vector<string>co;
 //    co.push_back("1\n*\ndengYu|92");
+//    co.push_back("1\n*\ndengYu|'jppd'");
 //    c.instertTOTable("'jpp'|92");
-//    c.deleteFromTable(Table::delete_mode::SELECT,name,co);
-    //c.test();
+//    c.show();
+//    c.deleteFromTable(Table::delete_mode::SELECT,name,co,"*A*");
+//    c.show();
+//    c.test();
 
 
     //update内容示例代码
-//            Table c ("sc");
-//            vector<string>name;
-//            name.push_back("name");
-//            vector<string>goal;
-//            goal.push_back("'mars'");
-//            vector<string>co;
-//            co.push_back("1\n*\ndengYu|'apu'");
-//            c.deleteFromTable();
-//            c.instertTOTable("'apu'|82");
-//            c.instertTOTable("'dpu'|92");
-//            c.show();
-//           c.updateTable(name,goal,co);
+            Table c ("sc1");
+            vector<string>cname;
+            cname.push_back("grade");
+            cname.push_back("grade");
+            vector<string>name;
+            name.push_back("name");
+            vector<string>goal;
+            goal.push_back("'mars'");
+            vector<string>co;
+            co.push_back("1\n*\ndengYu|92");
+            co.push_back("1\n*\ndaYu|80");
+            //co.push_back("1\n*\ndengYu|92");
+            c.deleteFromTable();
+            c.instertTOTable("'apu'|82");
+            c.instertTOTable("'dpu'|92");
+            c.show();
+           c.updateTable(name,goal,cname,co,"*O*");
+           c.show();
 
 
 
@@ -66,7 +76,9 @@ int main(int argc, char *argv[])
 //             c.alterTable(Table::alter_mode::RENAME,Table::alter_class::TABLE,"sc");
 
 
-
+//Table c ("sc");
+//c.alterTable(Table::alter_mode::RENAME,Table::alter_class::TABLE,"sc1");
+//c.show();
 
 //   Table c ("student");
 //c.instertTOTable("'dali'|19");
@@ -111,43 +123,6 @@ int main(int argc, char *argv[])
 //        cout<<666<<endl;
 //              else
 //              cerr<<"nsa"<<endl;
-    Table c("sc");
-    string add=c.add;
-    QString oldDirPath = QString::fromStdString(add);
-    qDebug() <<oldDirPath ;
-    QString newDirName = QString::fromStdString("content"); // 注意：这里只是新的目录名，不包含路径
-
-    QDir oldDir(oldDirPath);
-    if (!oldDir.exists()) {
-        qDebug() << "Directory does not exist:" << oldDirPath;
-        return false;
-    }
-
-    QString parentDirPath = oldDir.absolutePath();
-    qDebug() << "Directory does not exist:" << parentDirPath;
-
-    QString newDirPath = QDir(parentDirPath).filePath(newDirName); // 构建新的目录路径
-
-    QDir newDirParent = QDir(parentDirPath); // 确保父目录存在
-    if (!newDirParent.exists()) {
-        qDebug() << "Parent directory does not exist:" << parentDirPath;
-        return false;
-    }
-
-    // 检查新目录名是否已存在（作为文件或目录）
-    QFileInfo fileInfo(newDirPath);
-    if (fileInfo.exists()) {
-        qDebug() << "New directory name already exists:" << newDirPath;
-        return false;
-    }
-
-    // 尝试重命名目录
-    bool success = QDir().rename(oldDirPath, newDirPath);
-    if (!success) {
-        qDebug() << "Failed to rename directory from" << oldDirPath << "to" << newDirPath;
-    }
-
-    return success;
 
 
 
