@@ -50,24 +50,24 @@ int main(int argc, char *argv[])
 
 
     //update内容示例代码
-            Table c ("sc1");
-            vector<string>cname;
-            cname.push_back("grade");
-            cname.push_back("grade");
-            vector<string>name;
-            name.push_back("name");
-            vector<string>goal;
-            goal.push_back("'mars'");
-            vector<string>co;
-            co.push_back("1\n*\ndengYu|92");
-            co.push_back("1\n*\ndaYu|80");
-            //co.push_back("1\n*\ndengYu|92");
-            c.deleteFromTable();
-            c.instertTOTable("'apu'|82");
-            c.instertTOTable("'dpu'|92");
-            c.show();
-           c.updateTable(name,goal,cname,co,"*O*");
-           c.show();
+//            Table c ("sc1");
+//            vector<string>cname;
+//            cname.push_back("grade");
+//            cname.push_back("grade");
+//            vector<string>name;
+//            name.push_back("name");
+//            vector<string>goal;
+//            goal.push_back("'mars'");
+//            vector<string>co;
+//            co.push_back("1\n*\ndengYu|92");
+//            co.push_back("1\n*\ndaYu|80");
+//            //co.push_back("1\n*\ndengYu|92");
+//            c.deleteFromTable();
+//            c.instertTOTable("'apu'|82");
+//            c.instertTOTable("'dpu'|92");
+//            c.show();
+//           c.updateTable(name,goal,cname,co,"*O*");
+//           c.show();
 
 
 
@@ -123,7 +123,26 @@ int main(int argc, char *argv[])
 //        cout<<666<<endl;
 //              else
 //              cerr<<"nsa"<<endl;
+    Table c("sc1");
+    c.updateForeignKenyMessages();
 
+//        vector<tableRows> roows;
+//        roows.push_back(tableRows("name",type::CHAR,false,"","","'no name'",false));
+//        roows.push_back(tableRows("grade",type::INT,false,"grade","sc1","0",true));
+//        Table d2 (roows,"sc4");
+        Table d2("sc4");
+        //d2.setContrain("grade","1\n*\nbetween|10|100");
+        d2.updateForeignKenyMessages();
+//if(d2.checkForeignKenyMessages("sc1","name"))
+//{
+
+//    cerr << "6941594519451945194: "  << endl;
+//}
+//          else cerr << "Unable to open file: "  << endl;
+//d2.updateTable("'wvan'|86");
+//d1.deleteFromTable(Table::delete_mode::ALL);
+//d1.dropTable();
+//d1.updateForeignKenyMessages();
 
 
     return a.exec();

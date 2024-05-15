@@ -24,6 +24,14 @@ enum type
     INT,DOUBLE,CHAR,DATE
 };
 
+struct ForeignKenyMessages
+{
+    string table_f;
+    string row_f;
+    string table_b;
+    string row_b;
+
+};
 
 struct tableRows//要给一个静态变量int
 {
@@ -53,7 +61,7 @@ public:
     enum class save_mode{CONTENT=-1,ATTRIBUTE=1,BOTH=0};//保存文件的选项
     enum class delete_mode{ALL=-1,SELECT=0};
     enum class alter_mode{DROP,ADD,RENAME,MODIFY,ALTER};
-    enum class alter_class{ROW,PRIMARY_KRY,CONSTRAIN,TABLE,ROW_DEFAULT};
+    enum class alter_class{ROW,PRIMARY_KRY,FOREIGN_KEY,CONSTRAIN,TABLE,ROW_DEFAULT};
    //DROP+ROW,PRIMARY_KRY,CONSTRAIN
     //ADD+ROW,CONSTRAIN      后续补充INDEX
     //RENAME+ROW,TABLE
@@ -731,6 +739,25 @@ public:
     bool selectfrom(const vector<string>& selectedrows ,const string& tableName,const vector<string>rowname,const vector<string>&constrainMessage,const string& operation);
     bool selectallfrom(const string& tableName,const vector<string>rowname,const vector<string>&constrainMessage,const string& operation);
     void show();
+
+
+
+    bool updateForeignKenyMessages();//将所有外键约束写成一个文件
+    bool checkForeignKenyMessages(const string&table_c,const string&row_c);//将所有外键约束写成一个文件
+    string checkForeignKenyMessages_r(const string&table_c,const string&row_c);//将所有外键约束写成一个文件，返回值的，返回依赖的表和列名，用|分割
+    bool checkIfRefferenced();//检查本表中是否有被refference的列,用于drop，如果返回true禁止drop,,,,,只允许一个外键
+    //bool findIfExist(string checkForeignKenyMessages_return,string cont);//用于插入时检查，查找这个内容在被参考的列是否存在
+    bool find(const string&rname,const string&con);//查找本表中是否有列为con的内容
+    //drop方法也被修改了
+    //增加了
+//    struct ForeignKenyMessages
+//    {
+//        string table_f;
+//        string row_f;
+//        string table_b;
+//        string row_b;
+
+//    };
 
 
 
